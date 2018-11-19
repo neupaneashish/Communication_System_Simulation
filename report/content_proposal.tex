@@ -1,0 +1,80 @@
+\section{What we plan to do}
+Our group plans to explore the mimicking of long-exposure times through the post-processing of video.
+The goal of this project is to see how much the quality of images can be improved through treating
+video as a series of images and using processing to mimic long exposure times. We will compare the
+results on 1) cheap cameras 2) a DSLR. Our evaluation will include the following:
+
+\begin{itemize}
+\item Low-light performance
+\item How well noise can be compensated for or filtered out
+\item Situations where the technique is not well suited (e.g. something like median filtering in a
+scene with trees/leaves that move)
+\item What range of exposure times are practical?
+\item Does FPS have an effect on the quality of results?
+\end{itemize}
+
+\section{Intermediate Deliverables}
+
+\begin{itemize}
+\item Figure out what algorithms to use; e.g. averaging of many frames vs. `smooth waterfall' effect, or
+  others
+
+\item Figure out evaluation techniques and metrics
+
+\item Have a database of videos on all test cameras, as well as pictures with DSLR with long exposure time
+
+\item Technique for converting video format into series of still images
+\end{itemize}
+
+\section{Preliminary Paper list}
+
+This paper might be useful for a lit review on how frame averaging works, especially with motion in
+the video, which may be useful for stabilization
+
+\cite{motion_comp_averaging}
+
+Adaptive hybrid mean and median filtering of high-ISO long-exposure sensor noise for
+digital photography
+\cite{hyrbid_mean_median_filtering}
+
+Noise reduction in high dynamic range imaging
+\cite{noise_HDR}
+
+\section{Feedback}
+This sounds cool, and I'm looking forward to seeing some of your results.
+
+It sounds like the first part of your project is really about noise reduction.  Given that, I'd like
+to see you do a bit of theoretical examination of the noise sources, and make some predictions about
+how many pictures you need to achieve parity with a single long exposure, etc.  I blew through this
+way too fast in class, so I'd be happy to work with you in more detail on this.
+
+In general, a single exposure of duration T will have less noise than a combination of N shots each
+with duration T/N, so that by itself isn't super exciting.  Given this, there are a few reasons
+you'd use multiple exposures:
+1. There is motion of the camera (e.g., handshake) or the scene, and you don't want motion blur
+2. You're averaging frames to reduce noise, not adding them to make up a long exposure
+3. You want a long exposure (e.g., to get motion blur), but that would saturate the sensor.  The
+traditional solution here would be to use a neutral-density filter (ND filter) to darken the image,
+allowing a longer exposure.
+
+It wasn't completely clear to me from your proposal which of these you're considering.  Are you
+going to try and handle alignment to deal with motion blur, or are you just looking at stationary
+sequences?
+
+For converting video to a sequence images, check out ffmpeg and libav (they're two forks of the same
+open-source project, and either should work).  MATLAB and OpenCV (which also has Python bindings
+which integrate nicely with NumPy) also have mechanisms for reading video files as a series of
+frames.
+
+\section{Updated Plans}
+Lit-review for filtering out moving objects
+\begin{itemize}
+\item Median Filterting
+\item Better techniques
+\item Reducing noise
+\item Reducing bias (i.e. multimodal dist around true color and a secondary color)
+\end{itemize}
+
+This uses Kalman Filtering \cite{moving_object_removal}
+
+
