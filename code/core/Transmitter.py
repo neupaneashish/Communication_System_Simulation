@@ -22,11 +22,21 @@ class Transmitter():
 	def name(self):
 		return self.__type
 	
+	@property
+	def M(self):
+		return self.__M
+
 	'''
 		TRANSMIT THE IMAGE TO THE CHANNEL
 	'''
 	def transmit_bits(self, bit_stream):
 		return self.transmit_symbols(self.bits_to_symbols(bit_stream))	# Binary PAM
+
+	'''
+		Convert image into blocks of NxN and convert it to bit stream
+	'''
+	def bits_to_symbols(self, bit_stream):
+		return bit_stream # works only for binary PAM - TODO: include M-ary PAM
 
 	'''
 		TRANSMIT A SYMBOL STREAM TO THE CHANNEL
@@ -35,30 +45,27 @@ class Transmitter():
 	'''
 	def transmit_symbols(self, symbols):
 		symbol_coeffs = np.array([[self.__PAM_coeff[s],  *list(np.zeros(int(self.__Fs) - 1))] for s in symbols]).flatten()
-		#symbol_coeffs = symbol_coeffs[:-(int(self.__Fs) - 1)]
-
-		signal = np.convolve(symbol_coeffs, self.__pulse_t, mode='full')
 		
-		if self.__t[0] == 0:
-			start = 0
-		else :
-			start = int(np.size(self.__pulse_t) / 2)
+		signal = np.convolve(symbol_coeffs, self.__pulse_t, mode='full')
 
-		signal = signal[start:start + np.size(symbol_coeffs)]
+		start = np.argwhere(np.abs(self.__t) <= 1/(2 *self.__Fs)).flatten()[0]
+		signal = signal[start:start + np.size(symbol_coeffs) + 1]
 		
 		t = np.arange(0, np.size(signal)/self.__Fs, 1/self.__Fs)
 		
 		return t, signal
 		
-	@property
-	def M(self):
-		return self.__M
+	def get_matched_filter_response(self):
+		# assume pulse is symmetric - TODO : interp to get last value for assymmetric pulses
+		# h(t) = g(T - t), so t goes from (min - T) to (max - T)
+		t = np.arange(-self.__t[-1] + self.__T_p - 1/self.__Fs, 
+						-self.__t[0] + self.__T_p,
+						1/self.__Fs)
+		
+		h_t = np.array([self.__pulse_t[0], *list(np.flip(self.__pulse_t[1:]))])
+		#h_t = np.ones(np.shape(t))
+		return t, h_t, self.__T_p, self.__Fs
 	
-	'''
-		Convert image into blocks of NxN and convert it to bit stream
-	'''
-	def bits_to_symbols(self, bit_stream):
-		return bit_stream # works only for binary PAM - TODO: include M-ary PAM
 
 	'''
 		Impulse response of the pulse shaping filter
@@ -84,10 +91,10 @@ class Transmitter():
 
 class SRRCTransmitter(Transmitter):
 	def __init__(self, alpha, T_pulse, Fs, K, PAM_coeff = coeffs.BIN_ANTIPODAL):
-		A = 1	# condition for pulse energy = 1
 		N = Fs * T_pulse * 2 * K 
 
 		t = np.arange(-K * T_pulse, K * T_pulse, 1/Fs)
+		#t = np.linspace(-K * T_pulse, K * T_pulse, N)
 		pulse_t = np.zeros(np.shape(t))
 		pulse_t = np.array([ (1 - alpha + 4 * alpha / np.pi) if t[i] == 0 
 							else (alpha/np.sqrt(2) * ( (1 + 2/np.pi) * np.sin(np.pi / (4 * alpha)) + 
@@ -102,6 +109,8 @@ class SRRCTransmitter(Transmitter):
 				   		  			)
  							for i in range(np.size(t))
 						  ])
+		pulse_t = pulse_t / np.sqrt((np.sum(pulse_t ** 2)))
+		
 		super().__init__(t, pulse_t, T_pulse, name = 'SRRC_K=%g_al=%.2f' % (K, alpha), PAM_coeff = PAM_coeff)
 
 #	def update_pulse(self, alpha, T_pulse, Fs, K, PAM_coeff = super().self.BIN_ANTIPODAL):
@@ -109,11 +118,11 @@ class SRRCTransmitter(Transmitter):
 
 class HalfSineTransmitter(Transmitter):
 	def __init__(self, T_pulse, Fs, PAM_coeff = coeffs.BIN_ANTIPODAL):
-		A = np.sqrt(2 / (T_pulse)) 	# condition for pulse energy = 1
-		N = Fs * T_pulse
+		N = Fs * T_pulse 
 
 		t = np.arange(0, T_pulse, 1/Fs)
-		pulse_t = A * np.sin(np.pi / T_pulse * t)
+		pulse_t = np.sin(np.pi / T_pulse * t)
+		pulse_t = pulse_t / np.sqrt((np.sum(pulse_t ** 2)))
 					
 		super().__init__(t, pulse_t, T_pulse, name = 'Half-Sine', PAM_coeff = PAM_coeff)
 

@@ -19,6 +19,23 @@ def test_channel_response(channel, titleText = None, SAVED = False):
 	if SAVED:
 		myplt.save_current('{}_channel_impulse_response.png'.format(channel.name))
 
+def test_transmission(channel, transmitter, bits, SAVED = False):
+	t, modulated_signal = transmitter.transmit_bits(bits)
+	t, transmitted_signal = channel.transmit_signal(modulated_signal)
+	plt.figure()
+	plt.subplot(2,1,1)
+	myplt.signal_plot(np.arange(np.size(bits)), bits, discrete = True, 
+						titleText = 'Transmitter: %s, Channel: %s' % (transmitter.name, channel.name),
+						xText = 'n', yText = 'b[n]')
+	plt.subplot(2,1,2)
+	myplt.signal_plot(t, transmitted_signal, titleText = None)
+	if SAVED:
+		myplt.save_current('{}_modulated.png'.format(transmitter.name))
+
+	plt.figure()
+	myplt.bode_plot(t, transmitted_signal, titleText = 'Spectrum Transmitter: %s, Channel: %s' % (transmitter.name, channel.name))
+	if SAVED:
+		myplt.save_current('{}_modulated_freq.png'.format(transmitter.name))
 
 def test_eye_diagram(channel, transmitter, SAVED = False):
 	plt.figure()
@@ -40,10 +57,10 @@ if __name__ == "__main__":
 	T_pulse = 1	# sec
 	Fs = 32		# samples/sec in pulse representation
 	alpha = 0.5
-	K = 2
+	K = 4
 
 	noise_mean = 0
-	noise_vars = [0.001, 0.01, 0.1]
+	noise_vars = [0, 0.0001]
 
 	hs_tx = tx.HalfSineTransmitter(T_pulse, Fs)
 	srrc_tx = tx.SRRCTransmitter(alpha, T_pulse, Fs, K)
@@ -51,22 +68,25 @@ if __name__ == "__main__":
 
 	# channel impulse responses - modeled as an LTI system with finite impulse response 
 	h_test = np.array([1, 1/2, 3/4, -2/7])
-	b = h_test
-	a = np.ones(1)
 	
 
 	ch_test = chnl.Channel(h_test, np.ones(1), Fs, T_pulse, 'Test')
-	ch_indoor = chnl.IndoorChannel(Fs, T_pulse)
-	ch_outdoor = chnl.OutdoorChannel(Fs, T_pulse)
-	channels = [ch_test, ch_indoor, ch_outdoor]
+	#ch_indoor = chnl.IndoorChannel(Fs, T_pulse)
+	#ch_outdoor = chnl.OutdoorChannel(Fs, T_pulse)
+	#channels = [ch_test, ch_indoor, ch_outdoor]
+	channels = [ch_test]
 
+	random_bits = np.random.randint(2, size = 10)	# to test transmission
+			
 	for channel in channels:
-		test_channel_response(channel, SAVED = True)
+		#test_channel_response(channel, SAVED = False)
 
 		for transmitter in transmitters:
-			test_eye_diagram(channel, transmitter, SAVED = True)
+			#test_transmission(channel, transmitter, random_bits)
 
+			test_eye_diagram(channel, transmitter, SAVED = False)
 			for noise_var in noise_vars:
-				test_noise_eye(channel, transmitter, mean = noise_mean, var = noise_var, SAVED = True)
+				pass
+			#	test_noise_eye(channel, transmitter, mean = noise_mean, var = noise_var, SAVED = False)
 
 	plt.show()

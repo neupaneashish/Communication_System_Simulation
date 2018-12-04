@@ -2,7 +2,9 @@ import numpy as np
 from scipy import signal as sp 
 from matplotlib import pyplot as plt
 import PlotUtils as myplt
-
+'''
+	ONLY WORKS WITH CAUSAL CHANNELS
+'''
 class Channel():
 
 	def __init__(self, b, a, Fs, T_p, name):
@@ -16,12 +18,15 @@ class Channel():
 	@property
 	def name(self):
 		return self.__type
-	
+
+	def get_filter_coefficients(self):
+		return self.__b, self.__a
+		#return self.__b_nopad, self.__a_nopad
 
 	def transmit_signal(self, signal):
-		filtered_signal = sp.lfilter(self.__b, self.__a, signal)
-		#filtered_signal = filtered_signal[:np.size(signal)]
-		t = np.arange(0, np.size(filtered_signal)/self.__Fs, 1/self.__Fs) 
+		filtered_signal = np.convolve(signal, self.__b, mode='full')
+		#filtered_signal = sp.lfilter(self.__b, self.__a, signal)
+		t = np.arange(0, np.size(filtered_signal)/self.__Fs, 1/self.__Fs)
 		return t, filtered_signal
 
 	def plot_impulse_response(self, titleText = None):
@@ -33,27 +38,16 @@ class Channel():
 	def plot_freq_response(self, titleText = None):
 		if titleText is None:
 			titleText = 'Frequency Response ' + self.__type + ' Channel'
-
-		w, H_f = sp.freqz(self.__b, self.__a)
-		f = w / (2 * np.pi) * self.__Fs
-		plt.subplot(2,1,1)
-		plt.plot(f, np.abs(H_f))
-		plt.title(titleText)
-		plt.ylabel('|H(f)|')
-
-		plt.subplot(2,1,2)
-		plt.plot(f, np.angle(H_f) / np.pi)
-		plt.ylabel('<H(f), x pi rad/s')
-		plt.xlabel('f, Hz')
-		
-		plt.show(block=False)
-		plt.pause(0.0001)
+		t = np.arange(0, np.size(self.__b)/self.__Fs, 1/self.__Fs)
+		myplt.bode_plot(t, self.__b, titleText = titleText)
 
 	def plot_eye_diagram(self, transmitter, num_symbols = 1000):
 		random_symbols = np.random.randint(transmitter.M, size = num_symbols)
 		titleText = 'Eye Diagram, Transmitter : ' + transmitter.name + ' , Channel : ' + self.name
 		t, modulated_signal = transmitter.transmit_symbols(random_symbols)
 		t, transmitted_signal = self.transmit_signal(modulated_signal)
+		transmitted_signal = transmitted_signal[:np.size(modulated_signal)]
+		
 		myplt.eye_diagram_plot(t, transmitted_signal, self.__T_p, titleText = titleText)
 
 	def add_awgn(self, signal, mean = 0, var = 1):

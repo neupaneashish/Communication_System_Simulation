@@ -1,4 +1,4 @@
-TARGETS = Comms_Mid_Project_Report
+TARGETS = mid_project_report
 
 # Outputs [i.e. TARGET.pdf]
 PDFS = $(addsuffix .pdf,$(TARGETS))
@@ -7,7 +7,7 @@ PDFS = $(addsuffix .pdf,$(TARGETS))
 COMMON_TEX = $(filter-out $(addsuffix .tex,$(TARGETS)),$(wildcard *.tex))
 REFERENCES = references
 
-IMAGE_DIR=./figures
+IMAGE_DIR=../images/
 IMAGES = $(wildcard $(IMAGE_DIR)/*.png) $(wildcard $(IMAGE_DIR)/*.pdf) $(PS2PDFS)
 DEPENDANCIES = $(COMMON_TEX) $(IMAGES)
 

@@ -1,9 +1,97 @@
 \usepackage{graphicx}
 % declare the path(s) where your graphic files are
-\graphicspath{{./figures/}}
+\graphicspath{{../images/}}
 % and their extensions so you won't have to specify these with
 % every instance of \includegraphics
 \DeclareGraphicsExtensions{.pdf,.png}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage[caption=false,font=footnotesize]{subfig}
+\usepackage[font=footnotesize]{caption}
+
+\usepackage{units}
+\usepackage{listings}
+\usepackage{setspace}
+\usepackage{multicol}
+\usepackage{float}
+\usepackage{xcolor}
+
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+%-------------------------------------------------------------------
+% Custom Listing - MATLAB 
+%-------------------------------------------------------------------
+\lstdefinestyle{MATLAB} {
+	language=Matlab,%
+    %basicstyle=\color{red},
+    breaklines=true,%
+    morekeywords={matlab2tikz, assert, ytickformat, saveas},
+    keywordstyle=\color{blue},%
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},%
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},%
+    showstringspaces=false,
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, 
+}
+
+%-------------------------------------------------------------------
+% Custom Listing - PYTHON 
+%-------------------------------------------------------------------
+\lstdefinestyle{PYTHON} {
+	language=Python,%
+    %basicstyle=\color{red},
+    breaklines=true,
+    morekeywords={python2tikz},
+    keywordstyle=\color{blue},%
+    escapeinside={\%*}{*)},
+    frame = single,
+    keepspaces = true,
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},%
+    stringstyle=\color{mygreen},
+    commentstyle=\color{mygray},%
+    showstringspaces=false,
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    tabsize = 2,
+    numbersep=9pt, 
+}
+
+
+%-------------------------------------------------------
+% My  Macros 
+%-------------------------------------------------------
+\newcommand{\hRule}{\rule{\linewidth}{0.5 mm}}
+\newcommand {\boxit} [1] {
+					 \begin{tabular} {|c|}
+						\hline
+						 $\mathbf {#1}$ \\
+						 \hline
+					\end{tabular}
+					}
+\newcommand{\w}{\omega}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dd}[2]{\frac{d #1}{d #2}}
+
+\newcommand{\addfigure}[2]{
+    \begin{figure}
+        \centering
+        \includegraphics[width = 0.8\linewidth]{#1.png}
+        \caption{#2}
+        \label{#1}
+    \end{figure}
+}
+\newcommand{\addfigurehere}[2]{
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width = 0.8\linewidth]{#1.png}
+        \caption{#2}
+        \label{#1}
+    \end{figure}
+}

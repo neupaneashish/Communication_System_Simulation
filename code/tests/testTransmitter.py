@@ -67,7 +67,7 @@ if __name__ == "__main__":
 	T_pulse = 1	# sec
 	Fs = 32		# samples/sec per pulse
 	alpha = [0.25, 0.5]
-	K = [6, 2] 
+	K = [6, 4] 
 	
 	hs_tx = tx.HalfSineTransmitter(T_pulse, Fs)
 	test_pulse_shape_hs(hs_tx, SAVED = False)
