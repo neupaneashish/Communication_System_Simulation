@@ -31,7 +31,7 @@ if __name__ == '__main__':
 	Fs = 32		# samples/sec in pulse representation
 	alpha = 0.5
 	K = 4
-	noise_var = 0.0001
+	noise_var = 0.001
 	#transmitter = tx.HalfSineTransmitter(T_pulse, Fs)
 	transmitter = tx.SRRCTransmitter(alpha, T_pulse, Fs, K)
 

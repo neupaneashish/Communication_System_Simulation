@@ -76,7 +76,7 @@ class ZFEqualizer(Equalizer):
 		num_taps = 2**14 -1
 		t = np.arange(0, num_taps/Fs, 1/Fs)
 		t, h_t = sp.dimpulse(sp.dlti(b, a, dt = 1/Fs), t = t)
-		h_t = h_t[0].flatten()[:2**13]
+		h_t = h_t[0].flatten()[:2**12]
 		t = t[:2**13]
 		super().__init__(h_t, t, Fs, T_pulse, name = 'ZF')
 	
@@ -92,7 +92,7 @@ class MMSEEqualizer(Equalizer):
 		H_f_eq = np.conj(H_f_ch) / (np.abs(H_f_ch) ** 2 + noise_var)
 		
 		# plain ifft
-		h_t = ft.ifft(H_f_eq)[:2**13]
+		h_t = ft.ifft(H_f_eq)[:2**12]
 		t = np.arange(0, np.size(h_t)/Fs, 1/Fs)
 		
 		'''
