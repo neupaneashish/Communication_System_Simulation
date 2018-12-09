@@ -1,0 +1,81 @@
+\begin{abstract}
+Abstract goes here
+\end{abstract}
+
+\begin{IEEEkeywords}
+PAM, Baseband Communication, Digital Communication, Image Transmission, SRRC, Half-Sine, MMSE Equalizer, ZF Equalizer, Matched Filter
+\end{IEEEkeywords}
+
+\section{Overview}
+
+\section{Modules}
+\subsection{Image Pre-Processor}
+
+\subsection{Modulator}
+
+\subsection{Channel}
+
+\subsection{Noise}
+
+\subsection{Matched Filter}
+
+\subsection{Equalizer}
+Equalizer is necessary to remove the distortion caused by the channel. Two equalizers were implemented and compared in this project.
+
+
+\subsubsection{Zero Forcing Equalizer}
+Since the role of an equalizer is to undo the channel effect, a naive implementation of the frequency response can be the inverse of the frequency response of the channel.
+\begin{equation}
+ Q_{zf}(j\w) = \frac{1}{H_{ch}(j\w)}
+ \label{equation:zf}
+\end{equation}
+In our simulation, the impulse response of the zero-forcing equalizer was approximated with a causal FIR filter. The frequency response of the channel was calculated using \texttt{fft} on the impulse response, and inverted to get the frequency response of the equalizer. The impulse response was then computed using \texttt{ifft} (see Figure \ref{fig:zf_eq}). While a plain \texttt{fft} is not a great filter design tool, especially when the equalizer is expected to be an IIR filter, the filter could be approximated well using a long impulse response($2^{13}$ taps).
+
+\begin{figure}
+\subfloat[Impulse response \label{fig:zf_eq_imp}] {\includegraphics[width = 0.49\linewidth]{eye_eq_MMSE}}
+\subfloat[Frequency response \label{fig:zf_eq_freq}] {\includegraphics[width = 0.49\linewidth]{eye_eq_MMSE}}
+\caption{Response of zero forcing equalizer on test channel}
+\label{fig:zf_eq}
+\end{figure}
+
+{\color{red} COMMENT ON THE RESPONSE / STABILITY}
+
+\begin{figure}
+\includegraphics[width = 0.9\linewidth]{eye_eq_MMSE}
+\caption{Eye diagram after zero forcing equalizer on test channel}
+\label{fig:eye_zf_eq}
+\end{figure}
+{\color{red} COMMENT ON EYE DIAGRAM}
+
+\subsubsection{MMSE Equalizer}
+While the ZF equalizer is easy to design, it runs into problems at frequencies where the channel response is close to zero because any noise at such frequencies will be amplified with a high gain. A Minimum Mean Squared Error(MMSE) equalizer takes both the channel response and noise into account. 
+\begin{equation}
+Q_{mmse}(j\w) = \frac{H^*(j\w)}{|H(j\w)|^2 + \frac{\sigma^2}{E_b}}
+\label{equation:mmse}
+\end{equation}
+where $\sigma^2$ is the estimated noise variance, and $E_b$ is the pulse energy transmitted. While both quantities are known in the simulation, the design is extendable to real life scenarios where the noise variance has to be estimated. This can be done by estimating the signal to noise ratio at the sampling point, $\frac{E_b}{\sigma^2}$.
+
+The MMSE equalizer was implemented similar to the zero forcing equalizer. The frequency response of the equalizer was calculated at $2^{14}$ frequencies using equation \ref{equation:mmse}. Then the impulse response obtained with \texttt{ifft} was truncated to $2^{13}$ taps to approximate an IIR filter with a causal FIR filter. Even if \texttt{fft} is not a great filter design tool, it was chosen for simplicity in implementation.
+
+\begin{figure}
+\subfloat[Impulse response \label{fig:mmse_eq_imp}] {\includegraphics[width = 0.49\linewidth]{eye_eq_MMSE}}
+\subfloat[Frequency response \label{fig:mmse_eq_freq}] {\includegraphics[width = 0.49\linewidth]{eye_eq_MMSE}}
+\caption{Response of MMSE equalizer on test channel}
+\label{fig:zf_eq}
+\end{figure}
+
+{\color{red} COMMENT ON THE RESPONSE / STABILITY}
+
+
+\subsection{Sampling}
+
+
+\subsection{Image Post-Processor}
+
+\section{Results}
+
+\section{New Channels}
+\subsection{Indoor Channel}
+\subsection{Outdoor Channel}
+
+\section{Discussion}
