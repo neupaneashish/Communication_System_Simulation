@@ -7,6 +7,7 @@ PAM, Baseband Communication, Digital Communication, Image Transmission, SRRC, Ha
 \end{IEEEkeywords}
 
 \section{Overview}
+{\color{red} AS THIS SECTION IS FILLED, I HOPE THE PULSE SHAPE FIGURE WILL MOVE BELOW ABSTRACT - LOL IT DID}
 \begin{figure}
 	\includegraphics[width = 0.98\linewidth]{comms_block}
 	\caption{Block diagram of simulated baseband communication system}
@@ -17,6 +18,38 @@ PAM, Baseband Communication, Digital Communication, Image Transmission, SRRC, Ha
 \subsection{Image Pre-Processor}
 
 \subsection{Modulator}
+
+\begin{figure}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"tx_Half-Sine_impulse"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"tx_Half-Sine_freq"}.png}}
+\caption{Response of Half Sine pulse shaping filter}
+\label{fig:tx_hs}
+\end{figure}
+
+\begin{figure}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"tx_SRRC_impulse"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"tx_SRRC_freq"}.png}}
+\caption{Response of SRRC pulse shaping filter}
+\label{fig:tx_srrc}
+\end{figure}
+
+The half-sine pulse is exactly as long as the symbol duration($1\unit{s}$), and follows the sinusoidal shape as expected. The SRRC pulse is a sinc in time domain. For a truncation factor of K, the SRRC pulse spans a duration of 2 * K times the symbol duration. So, it will lead to higher Inter Symbol Interference(ISI) as it spans multiple symbols, whereas the half sine pulse doesn’t have any ISI.The SRRC pulse has a wider bandwidth compared to the half-sine, but the frequency roll off is better as seen in Figures \ref{fig:tx_hs} and \ref{fig:tx_srrc}. This means the SRRC pulse shaping filter will occupy less bandwidth, and interfere less with nearby frequency bands compared to half-sine. As K is increased, the SRRC pulse spans more symbols in time domain, and ------ in frequency domain. An increase in alpha leads to a wider pulse spectrum.
+
+\begin{figure}
+\subfloat[Modulated signal] {\includegraphics[width = 0.49\linewidth]{{"tx_Half-Sine_mod"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"tx_Half-Sine_mod_freq"}.png}}
+\caption{Half sine modulated signal(10 bits) and its frequency response}
+\label{fig:tx_hs_random}
+\end{figure}
+
+\begin{figure}
+\subfloat[Modulated signal] {\includegraphics[width = 0.49\linewidth]{{"tx_SRRC_K=4_al=0.50_mod"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"tx_SRRC_K=4_al=0.50_mod_freq"}.png}}
+\caption{SRRC($K=4, \alpha=0.5$) modulated signal(10 bits) and its frequency response}
+\label{fig:tx_srrc_random}
+\end{figure}
+
+The modulated signal is as expected. The half sine pulses show no ISI. So the signal looks cleaner, but the presence of sharp transitions means it needs a wider bandwidth(see Figure \ref{fig:tx_hs_random}). The SRRC modulated signal looks smoothed out because of ISI but we can still see the signal positive when bit $1$ is transmitted and negative when bit $0$ is transmitted. The lack of sharp changes explains why the spectrum occupies a smaller bandwidth in Figure \ref{fig:tx_srrc_random}. The spectrum follows the pulse shape spectrum, but with fluctuations over all frequencies as a result of putting the pulses together. The fluctuations are more pronounced for Half Sine because of the sharp discontinuities.
 
 \begin{figure}
 \subfloat[Half Sine \label{fig:eye_tx_hs}] {\includegraphics[width = 0.49\linewidth]{{"eye_tx_Half-Sine"}.png}}
