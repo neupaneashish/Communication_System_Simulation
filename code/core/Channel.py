@@ -39,7 +39,7 @@ class Channel():
 		if titleText is None:
 			titleText = 'Frequency Response ' + self.__type + ' Channel'
 		t = np.arange(0, np.size(self.__b)/self.__Fs, 1/self.__Fs)
-		myplt.bode_plot(t, self.__b, titleText = titleText)
+		myplt.bode_plot(t, self.__b, xlim = (-0.5, 0.5), titleText = titleText)
 
 	def plot_eye_diagram(self, transmitter, num_symbols = 1000):
 		random_symbols = np.random.randint(transmitter.M, size = num_symbols)

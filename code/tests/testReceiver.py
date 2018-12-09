@@ -13,12 +13,12 @@ def test_receiver_response(receiver, titleText = None, SAVED = False):
 	plt.figure()
 	receiver.plot_freq_response(titleText = titleText)
 	if SAVED:
-		myplt.save_current('{}_receiver_freq_response.png'.format(receiver.name))
+		myplt.save_current('rx_{}_freq.png'.format(receiver.name), 'PLOT')
 
 	plt.figure()
 	receiver.plot_impulse_response(titleText = titleText)
 	if SAVED:
-		myplt.save_current('{}_receiver_impulse_response.png'.format(receiver.name))
+		myplt.save_current('rx_{}_impulse.png'.format(receiver.name), 'PLOT')
 
 def test_reception_no_channel(receiver, transmitter, bits, SAVED = False):
 	t_mod, mod_signal = transmitter.transmit_bits(bits)
@@ -89,13 +89,23 @@ def test_sampling(receiver, transmitter, channel, bits, titleText = None, SAVED 
 def test_eye_diagram(receiver, transmitter, channel, noise_var = 0.01, SAVED = False):
 	plt.figure()
 	receiver.plot_eye_diagram(transmitter, channel, noise_var = noise_var)
+	if SAVED:
+		myplt.save_current('eye_rx_%s_ch_%s_2.png' % (receiver.name, channel.name), 'PLOT')
+
+def test_eye_diagram_no_channel(receiver, transmitter, SAVED = False):
+	plt.figure()
+	receiver.plot_eye_diagram_no_channel(transmitter)
+	if SAVED:
+		myplt.save_current('eye_rx_%s_no_ch_2.png' % receiver.name, 'PLOT')
+
+
 
 if __name__ == "__main__":
 	T_pulse = 1	# sec
 	Fs = 32		# samples/sec per pulse
 	alpha = 0.5
 	K = 4
-	noise_var = 0.001
+	noise_var = 0
 
 	hs_tx = tx.HalfSineTransmitter(T_pulse, Fs)
 	hs_rx = rx.MatchedReceiver(hs_tx)
@@ -116,10 +126,11 @@ if __name__ == "__main__":
 	for receiver, transmitter in zip(receivers, transmitters):
 		print('Working on- Receiver: ', receiver.name, 
 				', Transmitter: ', transmitter.name, ' ...')
-		#test_receiver_response(receiver)
-		test_reception_no_channel(receiver, transmitter, random_bits)
-		test_reception_no_noise(receiver, transmitter, ch_test, random_bits)
-		#test_eye_diagram(receiver, transmitter, ch_test, noise_var = noise_var)
+		#test_receiver_response(receiver, SAVED = True)
+		#test_reception_no_channel(receiver, transmitter, random_bits)
+		#test_reception_no_noise(receiver, transmitter, ch_test, random_bits)
+		test_eye_diagram_no_channel(receiver, transmitter, SAVED = True)
+		test_eye_diagram(receiver, transmitter, ch_test, noise_var = noise_var, SAVED = True)
 		#test_sampling(receiver, transmitter, ch_test, random_bits)
 
 	plt.show()

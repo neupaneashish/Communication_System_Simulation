@@ -12,12 +12,12 @@ def test_channel_response(channel, titleText = None, SAVED = False):
 	plt.figure()
 	channel.plot_freq_response(titleText = titleText)
 	if SAVED:
-		myplt.save_current('{}_channel_freq_response.png'.format(channel.name))
+		myplt.save_current('ch_{}_freq.png'.format(channel.name), 'PLOT')
 
 	plt.figure()
 	channel.plot_impulse_response(titleText = titleText)
 	if SAVED:
-		myplt.save_current('{}_channel_impulse_response.png'.format(channel.name))
+		myplt.save_current('ch_{}_impulse.png'.format(channel.name), 'PLOT')
 
 def test_transmission(channel, transmitter, bits, SAVED = False):
 	t, modulated_signal = transmitter.transmit_bits(bits)
@@ -43,7 +43,7 @@ def test_eye_diagram(channel, transmitter, SAVED = False):
 	
 	if SAVED:
 		filename = 'eye_%s_%s.png' % (channel.name, transmitter.name)
-		myplt.save_current(filename)
+		myplt.save_current(filename, 'PLOT')
 
 def test_noise_eye(channel, transmitter, mean = 0, var = 1, SAVED = False):
 	plt.figure()
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 	K = 4
 
 	noise_mean = 0
-	noise_vars = [0, 0.0001]
+	noise_vars = [0, 0.0001, 0.010]
 
 	hs_tx = tx.HalfSineTransmitter(T_pulse, Fs)
 	srrc_tx = tx.SRRCTransmitter(alpha, T_pulse, Fs, K)
@@ -79,12 +79,12 @@ if __name__ == "__main__":
 	random_bits = np.random.randint(2, size = 10)	# to test transmission
 			
 	for channel in channels:
-		#test_channel_response(channel, SAVED = False)
+		test_channel_response(channel, SAVED = True)
 
 		for transmitter in transmitters:
 			#test_transmission(channel, transmitter, random_bits)
 
-			test_eye_diagram(channel, transmitter, SAVED = False)
+			#test_eye_diagram(channel, transmitter, SAVED = False)
 			for noise_var in noise_vars:
 				pass
 			#	test_noise_eye(channel, transmitter, mean = noise_mean, var = noise_var, SAVED = False)

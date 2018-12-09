@@ -14,7 +14,7 @@ class ImageProcessor():
 		self.__base = 2	# 	base 2 b/c encoding to bits
 		self.__qct_table = np.ones((N, N,)) if qct_table is None else qct_table
 
-	def read_image(self, filename, FITSIZE = False):
+	def read_image_gray(self, filename, FITSIZE = False):
 		img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
 		m, n = np.shape(img)
 		if FITSIZE:

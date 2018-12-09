@@ -22,13 +22,13 @@ class Receiver():
 
 	def plot_impulse_response(self, titleText = None):
 		if titleText is None:
-			titleText = 'Impulse Response ' + self.__type + ' Receiver'
+			titleText = 'Impulse Response ' + self.__type + ' Filter'
 		myplt.signal_plot(self.__t, self.__h_t, yText = 'h(t)', titleText = titleText)
 
 
 	def plot_freq_response(self, titleText = None):
 		if titleText is None:
-			titleText = 'Frequency Response ' + self.__type + ' Receiver'
+			titleText = 'Frequency Response ' + self.__type + ' Filter'
 		myplt.bode_plot(self.__t, self.__h_t, titleText = titleText)
 
 	def receive_signal(self, signal):
@@ -64,6 +64,18 @@ class Receiver():
 		t = t[:N+1]
 		rec_signal = rec_signal[:N+1]
 		myplt.eye_diagram_plot(t, rec_signal, self.__T_p, eye_N=int(2 * self.__T_p * self.__Fs), titleText = titleText)
+
+	def plot_eye_diagram_no_channel(self, transmitter, num_symbols = 1000):
+		random_symbols = np.random.randint(transmitter.M, size = num_symbols)
+		titleText = ('Eye, TX : ' + transmitter.name +  'RX: ' + self.name)
+		t, modulated_signal = transmitter.transmit_symbols(random_symbols)
+		t, rec_signal = self.receive_signal(modulated_signal)
+
+		N = int(num_symbols * self.__Fs)
+		t = t[:N+1]
+		rec_signal = rec_signal[:N+1]
+		myplt.eye_diagram_plot(t, rec_signal, self.__T_p, eye_N=int(2 * self.__T_p * self.__Fs), titleText = titleText)
+
 
 class MatchedReceiver(Receiver):
 	def __init__(self, transmitter):

@@ -3,7 +3,7 @@ import numpy as np
 from numpy import fft as ft 
 
 
-def bode_plot(t, x_t, label = None, titleText = 'Frequency response'):
+def bode_plot(t, x_t, xlim=None, label = None, titleText = 'Frequency response'):
 	if np.size(t) <= 2:
 		error('Time series signal must have more than 2 samples.')
 		return None, None
@@ -17,11 +17,14 @@ def bode_plot(t, x_t, label = None, titleText = 'Frequency response'):
 	plt.plot(f, 20 * np.log10(np.abs(X_f)), label = label)
 	plt.title(titleText)
 	plt.ylabel('|H(f)|, dB')
-
+	if xlim is not None:
+		plt.xlim(xlim)
 	plt.subplot(2, 1, 2)
 	plt.plot(f, np.unwrap(np.angle(X_f)) / np.pi)
 	plt.xlabel('f, Hz')
 	plt.ylabel('< H(f), x pi rad/s')
+	if xlim is not None:
+		plt.xlim(xlim)
 
 	plt.show(block=False)
 	plt.pause(0.0001)

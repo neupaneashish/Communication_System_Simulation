@@ -31,7 +31,7 @@ class Equalizer():
 	def plot_freq_response(self, titleText = None):		
 		if titleText is None:
 			titleText = 'Frequency Response ' + self.__type + ' Equalizer'
-		myplt.bode_plot(self.__t, self.__h_t, titleText = titleText)
+		myplt.bode_plot(self.__t, self.__h_t, xlim = (-0.5, 0.5), titleText = titleText)
 
 	def equalize_signal(self, signal):
 		eq_signal = np.convolve(signal, self.__h_t, mode = 'full')

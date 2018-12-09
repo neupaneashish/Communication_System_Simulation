@@ -62,7 +62,7 @@ class Transmitter():
 						-self.__t[0] + self.__T_p,
 						1/self.__Fs)
 		
-		h_t = np.array([self.__pulse_t[0], *list(np.flip(self.__pulse_t[1:]))])
+		h_t = np.array([self.__pulse_t[0], *list(np.flip(self.__pulse_t[1:], 0))])
 		#h_t = np.ones(np.shape(t))
 		return t, h_t, self.__T_p, self.__Fs
 	
