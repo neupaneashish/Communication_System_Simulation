@@ -1,5 +1,5 @@
 \begin{abstract}
-Abstract goes here
+In this project, a baseband digital communication system was simulated using binary antipodal pulse amplitude modulation(PAM) for image transmission. The performance was compared with two pulse shapes: half-sine and square root raised cosine(SRRC). While the half-sine pulse showed less inter-symbol interference(ISI), the bandwidth performance was better with the SRRC pulse. For a test channel with a couple of echoes, two types of equalizers were implemented: zero-forcing, and minimum mean squared error(MMSE). The MMSE equalizer was more robust and performed better in presence of additive white gaussian noise(AWGN). The system was then simulated on models of indoor and outdoor communication channels to study the channel effect on transmission. The system worked seamlessly on the indoor channel, but not on the outdoor channel. 
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -7,22 +7,89 @@ PAM, Baseband Communication, Digital Communication, Image Transmission, SRRC, Ha
 \end{IEEEkeywords}
 
 \section{Overview}
+\begin{figure}
+	\includegraphics[width = 0.98\linewidth]{comms_block}
+	\caption{Block diagram of simulated baseband communication system}
+	\label{block}
+\end{figure}
 
 \section{Modules}
 \subsection{Image Pre-Processor}
 
 \subsection{Modulator}
 
+\begin{figure}
+\subfloat[Half Sine \label{fig:eye_tx_hs}] {\includegraphics[width = 0.49\linewidth]{{"eye_tx_Half-Sine"}.png}}
+\subfloat[SRRC \label{fig:eye_tx_srrc}] {\includegraphics[width = 0.49\linewidth]{{"eye_tx_SRRC_K=4_al=0.50"}.png}}
+\caption{Eye diagram after modulation}
+\label{fig:eye_tx}
+\end{figure}
+
+In Figure \ref{fig:eye_tx_hs}, see the prototypical eye diagram for the half-sine modulation with a wide eye opening because there is no ISI. For the SRRC eye diagram in Figure \ref{fig:eye_tx_srrc}, we still see the eye opening(at $t = T_p$), but there is much more ISI. We still have a big enough opening for decidability.
+
 \subsection{Channel}
+\begin{figure}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"ch_Test_impulse"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"ch_Test_freq"}.png}}
+\caption{Response of Test channel}
+\label{fig:ch_test}
+\end{figure}
+\begin{figure}
+\subfloat[Half Sine] {\includegraphics[width = 0.49\linewidth]{{"eye_tx_Half-Sine_ch_Test_ns_0.0000"}.png}}
+\subfloat[SRRC] {\includegraphics[width = 0.49\linewidth]{{"eye_tx_SRRC_K=4_al=0.50_ch_Test_ns_0.0000"}.png}}
+\caption{Eye diagram after Test channel}
+\label{fig:eye_ch_test}
+\end{figure}
+A test channel with a response in Figure \ref{fig:ch_test} was used in the simulations. The echoes in the impulse response is indicative of ISI. This is backed up by the closed eyes in Figure \ref{fig:eye_ch_test}.
 
 \subsection{Noise}
+\begin{figure}
+\subfloat[Half Sine $\sigma^2= 0.0001$] {\includegraphics[width = 0.49\linewidth]{{"eye_tx_Half-Sine_ch_Test_ns_0.0001"}.png}}
+\subfloat[SRRC $\sigma^2= 0.0001$] {\includegraphics[width = 0.49\linewidth]{{"eye_tx_SRRC_K=4_al=0.50_ch_Test_ns_0.0001"}.png}}
+\caption{Eye diagram after Noise}
+\label{fig:eye_ch_test_noise}
+\end{figure}
+We can see in Figure \ref{fig:eye_ch_test_noise} that even the smallest of noise ($\sigma^2 = 0.0001$) worsens the ISI introduced by the channel. The eye is expected to close more with increasing noise.
 
 \subsection{Matched Filter}
+\begin{figure}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"rx_Half-Sine Matched_impulse"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"rx_Half-Sine Matched_freq"}.png}}
+\caption{Response of Half Sine matched filter}
+\label{fig:rx_hs}
+\end{figure}
+\begin{figure}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"rx_SRRC_K=4_al=0.50 Matched_impulse"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"rx_SRRC_K=4_al=0.50 Matched_freq"}.png}}
+\caption{Response of Half Sine matched filter}
+\label{fig:rx_srrc}
+\end{figure}
+An optimal receiver for PAM modulated signal is the matched filter. Its impulse response is given by the equation
+\begin{equation}
+h_{m}(t) = g(T_p - t) 
+\label{equation:mf}
+\end{equation}
+where $T_p$ is the pulse duration, and $g(t)$ is the pulse shaping function. The pulse shapes and their frequency responses look identical(except with a shifted time scale for the SRRC pulse) in Figures \ref{fig:rx_hs} and \ref{fig:rx_srrc}. 
+\begin{figure}
+\subfloat[No channel 1 bit duration] {\includegraphics[width = 0.32\linewidth]{{"eye_rx_Half-Sine Matched_no_ch"}.png}} \hfill
+\subfloat[No channel 2 bit duration] {\includegraphics[width = 0.32\linewidth]{{"eye_rx_Half-Sine Matched_no_ch_2"}.png}} \hfill
+\subfloat[With test channel 2 bit duration] {\includegraphics[width = 0.32\linewidth]{{"eye_rx_Half-Sine Matched_ch_Test_ns_0.0000"}.png}} 
+\caption{Eye diagram after Half Sine matched filter}
+\label{fig:eye_rx_hs}
+\end{figure}
+\begin{figure}
+\subfloat[No channel 1 bit duration] {\includegraphics[width = 0.32\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_no_ch"}.png}} \hfill
+\subfloat[No channel 2 bit duration] {\includegraphics[width = 0.32\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_no_ch_2"}.png}} \hfill
+\subfloat[With test channel 2 bit duration] {\includegraphics[width = 0.32\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Test_ns_0.0000"}.png}} 
+\caption{Eye diagram after SRRC matched filter}
+\label{fig:eye_rx_srrc}
+\end{figure}
+
+By definition, the overlap between the pulses and hence the filter output is maximized at $t=T_p$. This is demonstrated by the wide eye openings at $t=1\unit{s}$ in Figures \ref{fig:eye_rx_hs} and \ref{fig:eye_rx_srrc}. The eye remains closed when the channel in placed in the pipeline due to the ISI introduced. Assuming a working equalizer, the optimal sampling time should be $t = k \cdot T_p$.
+
 
 \subsection{Equalizer}
 Equalizer is necessary to remove the distortion caused by the channel. Two equalizers were implemented and compared in this project.
-
-
 \subsubsection{Zero Forcing Equalizer}
 Since the role of an equalizer is to undo the channel effect, a naive implementation of the frequency response can be the inverse of the frequency response of the channel.
 \begin{equation}
@@ -30,22 +97,17 @@ Since the role of an equalizer is to undo the channel effect, a naive implementa
  \label{equation:zf}
 \end{equation}
 In our simulation, the impulse response of the zero-forcing equalizer was approximated with a causal FIR filter. The frequency response of the channel was calculated using \texttt{fft} on the impulse response, and inverted to get the frequency response of the equalizer. The impulse response was then computed using \texttt{ifft} (see Figure \ref{fig:zf_eq}). While a plain \texttt{fft} is not a great filter design tool, especially when the equalizer is expected to be an IIR filter, the filter could be approximated well using a long impulse response($2^{13}$ taps).
-
 \begin{figure}
-\subfloat[Impulse response \label{fig:zf_eq_imp}] {\includegraphics[width = 0.49\linewidth]{eye_eq_MMSE}}
-\subfloat[Frequency response \label{fig:zf_eq_freq}] {\includegraphics[width = 0.49\linewidth]{eye_eq_MMSE}}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"ZF_eq_impulse_ns_0.0000"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"ZF_eq_freq_ns_0.0000"}.png}}
 \caption{Response of zero forcing equalizer on test channel}
 \label{fig:zf_eq}
 \end{figure}
 
-{\color{red} COMMENT ON THE RESPONSE / STABILITY}
+As expected, the frequency response of the zero forcing equalizer(Figure \ref{fig:zf_eq}) is the inverse of the channel frequency response(Figure \ref{fig:ch_test}). While the impulse response suggests a stable equalizer for the channel in use, this can not always be guaranteed. If the channel transfer function had zeros in the right half of laplace plane(or outside the unit circle in discrete time), that would lead to an unstable pole in the equalizer transfer function. 
 
-\begin{figure}
-\includegraphics[width = 0.9\linewidth]{eye_eq_MMSE}
-\caption{Eye diagram after zero forcing equalizer on test channel}
-\label{fig:eye_zf_eq}
-\end{figure}
-{\color{red} COMMENT ON EYE DIAGRAM}
+As we can see in Figures \ref{fig:eye_eq_hs} and \ref{fig:eye_eq_srrc}, the eye opens up after channel equalization. With a zero forcing equalizer, the eye on the half sine transmitter is wider indicative of the smaller ISI in a half sine pulse. Compared to the MMSE equalizer, it is more susceptible to noise because the design didn't take noise into account.
+
 
 \subsubsection{MMSE Equalizer}
 While the ZF equalizer is easy to design, it runs into problems at frequencies where the channel response is close to zero because any noise at such frequencies will be amplified with a high gain. A Minimum Mean Squared Error(MMSE) equalizer takes both the channel response and noise into account. 
@@ -55,27 +117,119 @@ Q_{mmse}(j\w) = \frac{H^*(j\w)}{|H(j\w)|^2 + \frac{\sigma^2}{E_b}}
 \end{equation}
 where $\sigma^2$ is the estimated noise variance, and $E_b$ is the pulse energy transmitted. While both quantities are known in the simulation, the design is extendable to real life scenarios where the noise variance has to be estimated. This can be done by estimating the signal to noise ratio at the sampling point, $\frac{E_b}{\sigma^2}$.
 
-The MMSE equalizer was implemented similar to the zero forcing equalizer. The frequency response of the equalizer was calculated at $2^{14}$ frequencies using equation \ref{equation:mmse}. Then the impulse response obtained with \texttt{ifft} was truncated to $2^{13}$ taps to approximate an IIR filter with a causal FIR filter. Even if \texttt{fft} is not a great filter design tool, it was chosen for simplicity in implementation.
-
+The MMSE equalizer implementation was similar to the zero forcing equalizer. The frequency response of the equalizer was calculated at $2^{14}$ frequencies using equation \ref{equation:mmse}. Then the impulse response obtained with \texttt{ifft} was truncated to $2^{13}$ taps to approximate an IIR filter with a causal FIR filter (see Figure \ref{fig:mmse_eq}). Even if \texttt{fft} is not a great filter design tool, it was chosen for simplicity in implementation.
 \begin{figure}
-\subfloat[Impulse response \label{fig:mmse_eq_imp}] {\includegraphics[width = 0.49\linewidth]{eye_eq_MMSE}}
-\subfloat[Frequency response \label{fig:mmse_eq_freq}] {\includegraphics[width = 0.49\linewidth]{eye_eq_MMSE}}
-\caption{Response of MMSE equalizer on test channel}
-\label{fig:zf_eq}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"MMSE_eq_impulse_ns_0.0000"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"MMSE_eq_freq_ns_0.0000"}.png}}
+\caption{Response of MMSE equalizer on test channel without noise}
+\label{fig:mmse_eq}
+\end{figure}
+\begin{figure}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"MMSE_eq_impulse_ns_0.0100"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"MMSE_eq_freq_ns_0.0100"}.png}}
+\caption{Response of MMSE equalizer on test channel with Noise variance = 0.01}
+\label{fig:mmse_eq_noise}
 \end{figure}
 
-{\color{red} COMMENT ON THE RESPONSE / STABILITY}
+The frequency response of the MMSE equalizer is the same as that of the ZF equalizer in absence of noise(see Figures \ref{fig:zf_eq} and \ref{fig:mmse_eq}), but the peak drops down by $15 \unit{dB}$ with a noise variance of $0.01$. This suggests a better performance. In addition, stability is always guaranteed for a non zero noise and a stable channel. Since the poles and zeros of a transfer function occur in conjugate pairs, equation \ref{equation:mmse} leads to the same poles and zeros as the channel.
+\begin{figure}
+\subfloat[Zero Forcing no noise] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_Half-Sine Matched_ch_Test_eq_ZF_ns_0.0000"}.png}}
+\subfloat[MMSE no noise] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_Half-Sine Matched_ch_Test_eq_MMSE_ns_0.0000"}.png}} \\
+\subfloat[Zero Forcing $\sigma^2= 0.01$] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_Half-Sine Matched_ch_Test_eq_ZF_ns_0.0100"}.png}}
+\subfloat[MMSE $\sigma^2= 0.01$] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_Half-Sine Matched_ch_Test_eq_MMSE_ns_0.0100"}.png}} \\
+\caption{Eye diagram of equalizers on test channel using Half Sine Transmitter}
+\label{fig:eye_eq_hs}
+\end{figure}
+\begin{figure}
+\subfloat[Zero Forcing no noise] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Test_eq_ZF_ns_0.0000"}.png}}
+\subfloat[MMSE no noise] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Test_eq_MMSE_ns_0.0000"}.png}} \\
+\subfloat[Zero Forcing $\sigma^2= 0.01$] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Test_eq_ZF_ns_0.0100"}.png}}
+\subfloat[MMSE $\sigma^2= 0.01$] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Test_eq_MMSE_ns_0.0100"}.png}} \\
+\caption{Eye diagram of equalizers on test channel using SRRC Transmitter}
+\label{fig:eye_eq_srrc}
+\end{figure}
+
+As we can see in Figures \ref{fig:eye_eq_hs} and \ref{fig:eye_eq_srrc}, the eye opens up after channel equalization using a MMSE equalizer. When there's no noise, the performance is very similar to that of the ZF equalizer. But with a noise variance of $0.01$, the improvement in performance is clear as the eye is still open unlike after the ZF equalizer.
+
+\subsection{Sampling and Detection}
+By definition, the optimal sampling point of a matched filter receiver is at multiples of the pulse duration. This can be seen in the eye openings at time $t=T_p=1 \unit{ s}$ in Figures \ref{fig:eye_eq_hs} and \ref{fig:eye_eq_srrc}.  
+\begin{equation}
+	r[k] = r(k \cdot F_s \cdot T_p \cdot t)
+	\label{equation:sampling}
+\end{equation}
 
 
-\subsection{Sampling}
+Since the modulation scheme was Binary Antipodal PAM, the detection was done using a simple zero thresholding.
+\begin{equation}
+	\hat{b}_{k} = 	\begin{cases}
+						1, & r[k] \geq 0 \\
+						0, & r[k] < 0 
+					\end{cases}
+	\label{equation:detection}
+\end{equation}
 
+{\color{red} TALK ABOUT ERROR PROBABILITY}
 
 \subsection{Image Post-Processor}
 
 \section{Results}
+\begin{figure*}
+\subfloat[Transmitted] {\includegraphics[width = 0.24\linewidth]{{"cat"}.jpeg}} \hfill
+\subfloat[ZF equalizer, $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
+\subfloat[ZF equalizer, $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0010"}.png}} \hfill
+\subfloat[ZF equalizer, $\sigma^2 = 0.01$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0100"}.png}} 
+\\
+\subfloat[MMSE equalizer, $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_MMSE_ns_0.0000"}.png}} \hfill
+\subfloat[MMSE equalizer, $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_MMSE_ns_0.0010"}.png}} \hfill
+\subfloat[MMSE equalizer, $\sigma^2 = 0.01$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_MMSE_ns_0.0100"}.png}} \hfill
+\subfloat[MMSE equalizer, $\sigma^2 = 0.1$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_MMSE_ns_0.1000"}.png}} 
+\caption{Results of Binary PAM using Half Sine pulse on test channel}
+\label{fig:result_test_zf}
+\end{figure*}
 
-\section{New Channels}
+\begin{figure*}
+\subfloat[Transmitted] {\includegraphics[width = 0.24\linewidth]{{"cat"}.jpeg}} \hfill
+\subfloat[ZF equalizer, $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_K=4_al=0.50_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
+\subfloat[ZF equalizer, $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_K=4_al=0.50_ch_Test_eq_ZF_ns_0.0010"}.png}} \hfill
+\subfloat[ZF equalizer, $\sigma^2 = 0.01$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_K=4_al=0.50_ch_Test_eq_ZF_ns_0.0100"}.png}} 
+\\
+\subfloat[MMSE equalizer, $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_K=4_al=0.50_ch_Test_eq_MMSE_ns_0.0000"}.png}} \hfill
+\subfloat[MMSE equalizer, $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_K=4_al=0.50_ch_Test_eq_MMSE_ns_0.0010"}.png}} \hfill
+\subfloat[MMSE equalizer, $\sigma^2 = 0.01$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_K=4_al=0.50_ch_Test_eq_MMSE_ns_0.0100"}.png}} \hfill
+\subfloat[MMSE equalizer, $\sigma^2 = 0.1$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_K=4_al=0.50_ch_Test_eq_MMSE_ns_0.1000"}.png}} 
+\caption{Results of Binary PAM using SRRC pulse on test channel}
+\label{fig:result_test_mmse}
+\end{figure*}
+
+\section{Channel Effect}
+Since the noise performance was best with -- pulse and MMSE equalizer, the channel effect was investigated using that particular combination of pulse shape and equalizer.
+
 \subsection{Indoor Channel}
-\subsection{Outdoor Channel}
+\iffalse
+\begin{figure*}
+\subfloat[Transmitted] {\includegraphics[width = 0.24\linewidth]{{"cat"}.jpeg}} \hfill
+\subfloat[RX SRRC $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
+\subfloat[RX SRRC $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0010"}.png}} \hfill
+\subfloat[RX SRRC $\sigma^2 = 0.1$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.1000"}.png}} 
+\caption{Results of Binary PAM using MMSE equalizer on indoor channel}
+\label{fig:result_indoor_mmse}
+\end{figure*}
+\fi
 
-\section{Discussion}
+
+\subsection{Outdoor Channel}
+\iffalse
+\begin{figure*}
+\subfloat[Transmitted] {\includegraphics[width = 0.24\linewidth]{{"cat"}.jpeg}} \hfill
+\subfloat[RX HalfSine $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
+\subfloat[RX HalfSine $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0010"}.png}} \hfill
+\subfloat[RX HalfSine $\sigma^2 = 0.01$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0100"}.png}} 
+\\
+\subfloat[RX SRRC $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
+\subfloat[RX SRRC $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0010"}.png}} \hfill
+\subfloat[RX SRRC $\sigma^2 = 0.01$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0100"}.png}} \hfill
+\subfloat[RX SRRC $\sigma^2 = 0.1$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.1000"}.png}} 
+\caption{Results of Binary PAM using MMSE equalizer on outdoor channel}
+\label{fig:result_outdoor_mmse}
+\end{figure*}
+\fi
