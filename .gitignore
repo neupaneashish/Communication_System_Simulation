@@ -8,6 +8,7 @@ __pycache__
 *.png
 *.jpg
 *.MOV
+*.jpeg
 
 #\# Core latex/pdflatex auxiliary files:
 *.aux
