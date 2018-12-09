@@ -20,20 +20,28 @@ image_files = image_files[:1] if DEBUG else image_files
 image_files = [os.path.join(IMG_IN_PATH, file) for file in image_files]
 
 
+def transmit_camera_with_eye_plots(comms_system, noise_var = 0):
+	comms_sys.run_simulation('../../images_in/camera-icon.png', noise_var = noise_var,
+								img_basename = 'camera', 
+								VERBOSE = True, DISPLAYED = True, 
+								EYES = True, SAVED = False)	
+
+
 if __name__ == '__main__':
 	# image_processor definition
 	block_size = 8
 	num_quant_bits = 8
-	dct_ip = ip.LinearDCTImageProcessor(block_size, num_quant_bits)
+	dct_ip = ip.NoCompressDCTImageProcessor(block_size, num_quant_bits)
+	#dct_ip = ip.LinearDCTImageProcessor(block_size, num_quant_bits)
 	
 	# transmitter definition
 	T_pulse = 1	# sec
 	Fs = 32		# samples/sec in pulse representation
 	alpha = 0.5
 	K = 4
-	noise_var = 0.001
-	#transmitter = tx.HalfSineTransmitter(T_pulse, Fs)
-	transmitter = tx.SRRCTransmitter(alpha, T_pulse, Fs, K)
+	noise_var = 0.01
+	transmitter = tx.HalfSineTransmitter(T_pulse, Fs)
+	#transmitter = tx.SRRCTransmitter(alpha, T_pulse, Fs, K)
 
 	# channel definition
 	h_ch = np.array([1, 1/2, 3/4, -2/7])
@@ -52,11 +60,13 @@ if __name__ == '__main__':
 	comms_sys = comms.CommsSystem(dct_ip, transmitter, 
 								  channel, receiver, equalizer)
 
+	transmit_camera_with_eye_plots(comms_sys, noise_var= noise_var)
+	'''
 	for file in image_files:
 		img_basename = os.path.splitext(os.path.basename(file))[0]
 		comms_sys.run_simulation(file, noise_var = noise_var,
 									img_basename = img_basename, 
 									VERBOSE = True, DISPLAYED = True, 
 									EYES = False, SAVED = False)
-
+	'''
 	plt.show()

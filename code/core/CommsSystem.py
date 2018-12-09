@@ -39,18 +39,50 @@ class CommsSystem():
 			print('Modulating bits ...')
 		t_mod, mod_signal = self.__tx.transmit_bits(bits)
 
+		N_sig = len(mod_signal)
+
+		if EYES: 
+			plt.figure()
+			myplt.eye_diagram_plot(t_mod, mod_signal, 1, eye_N = 32, titleText = 'Eye Diagram after TX: %s' % self.__tx.name )
+			if SAVED:
+				myplt.save_current('eye_tx_%s.png' % self.__tx.name, 'PLOT')
+
 		if VERBOSE:
 			print('Transmitting signal ...')
 		t_tx, tx_signal = self.__ch.transmit_signal(mod_signal)
+		if EYES: 
+			plt.figure()
+			myplt.eye_diagram_plot(t_tx[:N_sig], tx_signal[:N_sig], 1, eye_N = 32, titleText = 'Eye Diagram after CH: %s' % self.__ch.name )
+			if SAVED:
+				myplt.save_current('eye_tx_%s.png' % self.__ch.name, 'PLOT')
+
+
 		tx_signal = self.__ch.add_awgn(tx_signal, var = noise_var)
+		if EYES: 
+			plt.figure()
+			myplt.eye_diagram_plot(t_tx[:N_sig], tx_signal[:N_sig], 1, eye_N = 32, titleText = 'Eye Diagram after CH: %s Noise: %.4f' % (self.__ch.name, noise_var) )
+			if SAVED:
+				myplt.save_current('eye_tx_%s_noise_%.4f.png' % (self.__ch.name, noise_var ), 'PLOT')
+
 
 		if VERBOSE:
 			print('Receiving signal ...')		
 		t_rec, rec_signal = self.__rx.receive_signal(tx_signal)
+		if EYES: 
+			plt.figure()
+			myplt.eye_diagram_plot(t_rec[:N_sig], rec_signal[:N_sig], 1, eye_N = 2*32, titleText = 'Eye Diagram after RX: %s' % self.__rx.name )
+			if SAVED:
+				myplt.save_current('eye_rx_%s.png' % self.__rx.name, 'PLOT')
+
 
 		if VERBOSE:
 			print('Equalizing signal ...')				
 		t_eq, eq_signal = self.__eq.equalize_signal(rec_signal)
+		if EYES: 
+			plt.figure()
+			myplt.eye_diagram_plot(t_eq[:N_sig], eq_signal[:N_sig], 1, eye_N = 2*32, titleText = 'Eye Diagram after EQ: %s' % self.__eq.name )
+			if SAVED:
+				myplt.save_current('eye_eq_%s.png' % self.__eq.name, 'PLOT')
 
 		if VERBOSE:
 			print('Sampling signal ...')				
@@ -66,9 +98,6 @@ class CommsSystem():
 			myplt.show_image(img_out, titleText = 'Image output : %s' % img_basename)
 
 		if SAVED:
-			pass
-
-		if EYES: 
 			pass
 
 		if VERBOSE:

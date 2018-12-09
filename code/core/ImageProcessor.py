@@ -12,9 +12,7 @@ class ImageProcessor():
 		self.__invtransform = invtransform
 		self.__num_bits = num_bits
 		self.__base = 2	# 	base 2 b/c encoding to bits
-		if qct_table is None: 					# scaling factor for each DCT component in NxN block
-			self.__qct_table = np.ones((N, N,))	# all ones for equal priority to all f
-		
+		self.__qct_table = np.ones((N, N,)) if qct_table is None else qct_table
 
 	def read_image(self, filename, FITSIZE = False):
 		img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
@@ -45,12 +43,12 @@ class ImageProcessor():
 		all_pixels = (np.array(all_pixels) - minval) / (maxval - minval)
 		#print('all pixels: ', np.shape(all_pixels), all_pixels)
 		
-		bits = self.encode_norm_px_to_bits(all_pixels)
+		bits = self.naive_encode_norm_px_to_bits(all_pixels)
 		
 		return bits, maxval, minval
 
 	def bits_to_image(self, bits, px_n_bits, dim, maxval, minval):	
-		pixels = self.decode_bits_to_px(bits)
+		pixels = self.naive_decode_bits_to_px(bits)
 		#print('pixels decoded: ', np.shape(pixels), pixels)
 		# normalize and scale pixels 
 		pixels = pixels / (self.__base**self.__num_bits)
@@ -74,7 +72,7 @@ class ImageProcessor():
 		img = np.round(img * (2**px_n_bits - 1))
 		return img.astype(int)
 
-	def decode_bits_to_px(self, bits):
+	def naive_decode_bits_to_px(self, bits):
 		#print('bits before: ', np.shape(bits))
 		pixels = [bits[i:i+self.__num_bits] for i in range(0, np.size(bits), self.__num_bits)]
 		#print('bits split: ', np.shape(pixels), pixels)
@@ -83,7 +81,7 @@ class ImageProcessor():
 		pixels = np.array([np.sum(pixel*pow_base) for pixel in pixels])
 		return pixels
 	
-	def encode_norm_px_to_bits(self, pixels):	# array of pixels in range 0 - 1
+	def naive_encode_norm_px_to_bits(self, pixels):	# array of pixels in range 0 - 1
 		pow_base = self.__base**np.arange(self.__num_bits - 1, -1, -1)
 		#print('base powers', pow_base)
 		pixels = [int(round(px * (self.__base**self.__num_bits - 1))) for px in pixels]
@@ -93,11 +91,21 @@ class ImageProcessor():
 		bits = np.array(bits).flatten()
 		return bits
 
-class LinearDCTImageProcessor(ImageProcessor):
+class NoCompressDCTImageProcessor(ImageProcessor):
 	def __init__(self, N_block, N_bits_per_px):
 		transform = ft.dctn
 		invtransform = ft.idctn
 		super().__init__(N_block, transform, invtransform, N_bits_per_px)
+
+class LinearDCTImageProcessor(ImageProcessor):
+	def __init__(self, N_block, N_bits_per_px):
+		transform = ft.dctn
+		invtransform = ft.idctn
+		lin_qct_table = np.ones((N_block, N_block,))
+		for i in range(N_block//2, N_block):
+			for j in range(N_block//2, N_block):
+				lin_qct_table[i, j] = 2 * i * j
+		super().__init__(N_block, transform, invtransform, N_bits_per_px, qct_table = lin_qct_table)
 
 
 if __name__ == "__main__":
