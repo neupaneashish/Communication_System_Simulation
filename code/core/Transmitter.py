@@ -70,17 +70,19 @@ class Transmitter():
 	'''
 		Impulse response of the pulse shaping filter
 	'''
-	def plot_impulse_response(self, label = None):
+	def plot_impulse_response(self, titleText = None):
 		print('\tPlotting impulse response ...')
-		titleText = 'Impulse Response ' + self.__type + ' pulse shaping filter'
+		if titleText is None:
+			titleText = 'Impulse Response ' + self.__type + ' pulse shaping filter'
 		myplt.signal_plot(self.__t, self.__pulse_t, titleText = titleText, yText = 'h(t)')
 
 	'''
 		Frequency response of the pulse shaping filter
 	'''
-	def plot_freq_response(self, label = None):
+	def plot_freq_response(self, titleText = None):
 		print('\tPlotting frequency response ...')
-		titleText = 'Frequency Response ' + self.__type + ' pulse shaping filter'
+		if titleText is None:
+			titleText = 'Frequency Response ' + self.__type + ' pulse shaping filter'
 		myplt.bode_plot(self.__t, self.__pulse_t, titleText = titleText)
 
 	def plot_eye_diagram(self, num_symbols = 1000):

@@ -11,27 +11,27 @@ def test_pulse_shape_hs(hs_tx, SAVED = False):
 	plt.figure()
 	hs_tx.plot_impulse_response()
 	if SAVED:
-		myplt.save_current('impulse_half_sine.png')
+		myplt.save_current('tx_%s_impulse.png' % hs_tx.name, 'PLOT')
 
 	plt.figure()
 	hs_tx.plot_freq_response()
 	if SAVED:
-		myplt.save_current('freq_half_sine.png')
+		myplt.save_current('tx_%s_freq.png' % hs_tx.name, 'PLOT')
 
 def test_pulse_shape_srrc(srrc_tx, K, alpha, SAVED = False):
 	plt.figure()
 	for transmitter in srrc_tx:
-		transmitter.plot_impulse_response()
+		transmitter.plot_impulse_response(titleText = 'Impulse response SRRC pulse')
 	plt.legend(['K=%g, alpha=%.2f' % (k, al) for k in K for al in alpha])
 	if SAVED:
-		myplt.save_current('impulse_srrc.png')
+		myplt.save_current('tx_SRRC_impulse.png', 'PLOT')
 
 	plt.figure()
 	for transmitter in srrc_tx:
-		transmitter.plot_freq_response()
+		transmitter.plot_freq_response(titleText = 'Frequency response SRRC pulse')
 	plt.legend(['K=%g, alpha=%.2f' % (k, al) for k in K for al in alpha])
 	if SAVED:
-		myplt.save_current('freq_srrc.png')
+		myplt.save_current('tx_SRRC_freq.png', 'PLOT')
 
 def test_modulation(transmitter, bits, Fs , SAVED = False):
 	t, modulated_signal = transmitter.transmit_bits(bits)
@@ -44,12 +44,12 @@ def test_modulation(transmitter, bits, Fs , SAVED = False):
 	plt.subplot(2,1,2)
 	myplt.signal_plot(t, modulated_signal, titleText = None)
 	if SAVED:
-		myplt.save_current('{}_modulated.png'.format(transmitter.name))
+		myplt.save_current('tx_%s_mod.png' % transmitter.name, 'PLOT')
 
 	plt.figure()
 	myplt.bode_plot(t, modulated_signal, titleText = 'Spectrum of modulated signal %s' % transmitter.name)
 	if SAVED:
-		myplt.save_current('{}_modulated_freq.png'.format(transmitter.name))
+		myplt.save_current('tx_%s_mod_freq.png' % transmitter.name, 'PLOT')
 
 def test_eye_diagram(transmitter, SAVED = False):
 	plt.figure()
@@ -70,10 +70,10 @@ if __name__ == "__main__":
 	K = [6, 4] 
 	
 	hs_tx = tx.HalfSineTransmitter(T_pulse, Fs)
-	test_pulse_shape_hs(hs_tx, SAVED = False)
+	test_pulse_shape_hs(hs_tx, SAVED = True)
 	
 	srrc_txs = [tx.SRRCTransmitter(al, T_pulse, Fs, k) for k in K for al in alpha]
-	test_pulse_shape_srrc(srrc_txs, K, alpha, SAVED = False)
+	test_pulse_shape_srrc(srrc_txs, K, alpha, SAVED = True)
 	
 
 	'''
@@ -87,8 +87,8 @@ if __name__ == "__main__":
 	transmitters = [hs_tx, srrc_txs[-1], srrc_txs[0]]
 
 	for transmitter in transmitters:
-		test_modulation(transmitter, random_bits, Fs, SAVED = False)
-		test_eye_diagram(transmitter, SAVED = False)	
+		test_modulation(transmitter, random_bits, Fs, SAVED = True)
+		#test_eye_diagram(transmitter, SAVED = False)	
 	
 
 

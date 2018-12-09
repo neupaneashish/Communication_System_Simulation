@@ -74,13 +74,13 @@ def transmit_camera_with_eye_plots_zf(block_size, qbits, T_pulse, Fs, K, alpha, 
     if comms_systems is not None:
         comms_systems = [comms_systems]
     else:
-        comms_systems = [#initialize_hs_zf_testch(block_size, qbits, T_pulse, Fs),
+        comms_systems = [initialize_hs_zf_testch(block_size, qbits, T_pulse, Fs),
                         initialize_srrc_zf_testch(block_size, qbits, T_pulse, Fs, K, alpha)]
 
     if noise_var is not None:
         noises = [noise_var]
     else:
-        noises = [0, 0.0001, 0.01]
+        noises = [0, 0.01]
 
     filename = os.path.join(IMG_IN_PATH, 'camera-icon.png')
     for comms_sys in comms_systems:
