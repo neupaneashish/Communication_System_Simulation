@@ -7,7 +7,8 @@ PAM, Baseband Communication, Digital Communication, Image Transmission, SRRC, Ha
 \end{IEEEkeywords}
 
 \section{Overview}
-{\color{red} AS THIS SECTION IS FILLED, I HOPE THE PULSE SHAPE FIGURE WILL MOVE BELOW ABSTRACT - LOL IT DID}
+In this project we simulate a baseband digital antipodal PAM communications system. The goal of this system is to send a gray-scale image through a non-ideal environment and receive it with a simulated receive chain. We analyze two different pulse shaping functions, as well as the parameters that alter their performance. These techniques are analyzed with one primary channel, but we also investigate two “real world” channels, one simulating the outdoors, and one simulating indoors. These channels introduce noise as well as inter-symbol-interference (or ISI) To counter these simulated non-idealities we implement a matched filter for each pulse-shaping function as well as two different equalizers. We examine the strengths and weaknesses of all of these factors. After this simulated transmit and receive chain we sample our received signal and use some post processing to reconstruct the image we sent.
+
 \begin{figure}
 	\includegraphics[width = 0.98\linewidth]{comms_block}
 	\caption{Block diagram of simulated baseband communication system}
@@ -16,32 +17,60 @@ PAM, Baseband Communication, Digital Communication, Image Transmission, SRRC, Ha
 
 \section{Modules}
 \subsection{Image Pre-Processor}
+Communication Systems are usually designed to handle high quality image transmission. In order to speed up transmission, the pixel values after taking a Discrete Cosine Transform(DCT) are transmitted instead of the actual pixel intensities. The reason DCT speeds up processing, and has found applications in audio and image compression, is because an usual image has very few high frequency content. The zeros seen in the DCT values can then be coded using an efficient encoding scheme such as Huffman Code. In addition, the high frequency components can be sent with less protection than the important lower frequency components. Since image processing is outside the scope of this class, DCT was taken on $8 \times 8$ blocks before quantizing it to $8$ bits for transmission, but no compression was actually done. The matrix of DCT transformed blocks were then flattened into an array of bits and transmitted through the channel like a 1-D bit stream. While this method doesn't speed up processing as every pixel is encoded into $8$ bits anyway, the framework is there in the simulation to incorporate some compression for a faster transmission. 
 
 \subsection{Modulator}
+The half sine pulse is defined as:
+\begin{equation}
+g_{hs}(t) = \begin{cases}
+				A_{hs} sin(\frac{\pi}{T_p} t), & b = 1 \\
+				-A_{hs} sin(\frac{\pi}{T_p} t), & b = 0 
+			\end{cases} \quad 0 \leq t \leq T_p
+\end{equation}
+where $A_{hs}$ is the normalization coefficient calculated to set the pulse energy to 1, $T_p$ is the pulse duration, and $b$ is the transmitted bit. The SRRC pulse is defined as:
+\begin{equation}
+g_{srrc}(t) = \begin{cases}
+				A_{srrc} x(t), & b = 1 \\
+				-A_{srrc} x(t), & b = 0 
+			\end{cases} \quad -K \cdot T_p \leq t \leq K \cdot T_p
+\end{equation}
+where $A_{srrc}$ is the normalization coefficient calculated to set the pulse energy to 1, $T_p$ is the pulse duration, $b$ is the transmitted bit, K is the truncation factor in number of symbols, and $x(t)$(derived from the frequency domain definition) is defined as:
+\[ 
+x(t) = \begin{cases}
+	1 - \alpha + 4 \frac{\alpha}{\pi}, \\ \quad \quad \quad \quad t = 0 \\
+	\frac{\alpha}{\sqrt{2}}
+	\Big[ \Big( 1 + \frac{2}{\pi}\Big) 
+		  sin \Big( \frac{\pi}{4 \alpha} \Big) + 
+	  	  \Big( 1 - \frac{2}{\pi}\Big) 
+		  cos \Big( \frac{\pi}{4 \alpha} \Big)
+	\Big], \\ \quad \quad  \quad \quad t = \pm \frac{T_p}{4 \alpha} \\
 
+\frac {sin \Big(\pi \frac{t}{T_p}(1 - \alpha) \Big) +
+ 4 \alpha \frac{t}{T_p} cos \Big(\pi \frac{t}{T_p}(1 + \alpha) \Big) } 
+{\pi \frac{t}{T_p}\Big( 1 - \Big( 4 \alpha \frac{t}{T_p}\Big)^2 \Big)} 
+ , \\ \quad \quad \quad \quad else 
+\end{cases}
+\] where $\alpha$ is the roll off factor.
 \begin{figure}
 \subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"tx_Half-Sine_impulse"}.png}}
 \subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"tx_Half-Sine_freq"}.png}}
 \caption{Response of Half Sine pulse shaping filter}
 \label{fig:tx_hs}
 \end{figure}
-
 \begin{figure}
-\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"tx_SRRC_impulse"}.png}}
-\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"tx_SRRC_freq"}.png}}
+\subfloat[Impulse response] {\includegraphics[width = 0.98\linewidth]{{"tx_SRRC_impulse"}.png}} \\
+\subfloat[Frequency response] {\includegraphics[width = 0.98\linewidth]{{"tx_SRRC_freq"}.png}}
 \caption{Response of SRRC pulse shaping filter}
 \label{fig:tx_srrc}
 \end{figure}
-
-The half-sine pulse is exactly as long as the symbol duration($1\unit{s}$), and follows the sinusoidal shape as expected. The SRRC pulse is a sinc in time domain. For a truncation factor of K, the SRRC pulse spans a duration of 2 * K times the symbol duration. So, it will lead to higher Inter Symbol Interference(ISI) as it spans multiple symbols, whereas the half sine pulse doesn’t have any ISI.The SRRC pulse has a wider bandwidth compared to the half-sine, but the frequency roll off is better as seen in Figures \ref{fig:tx_hs} and \ref{fig:tx_srrc}. This means the SRRC pulse shaping filter will occupy less bandwidth, and interfere less with nearby frequency bands compared to half-sine. As K is increased, the SRRC pulse spans more symbols in time domain, and ------ in frequency domain. An increase in alpha leads to a wider pulse spectrum.
-
+The half-sine pulse is exactly as long as the symbol duration($1\unit{s}$), and follows the sinusoidal shape as expected. The SRRC pulse is a sinc in time domain. For a truncation factor of K, the SRRC pulse spans a duration of 2 * K times the symbol duration. So, it will lead to higher Inter Symbol Interference(ISI) as it spans multiple symbols, whereas the half sine pulse doesn’t have any ISI.The SRRC pulse has a smaller bandwidth compared to the half-sine, and the frequency roll off is better as seen in Figures \ref{fig:tx_hs} and \ref{fig:tx_srrc}. Increasing K on the SRRC pulse decreases the sidelobe levels as it resembles an ideal SRRC pulse better, whereas increasing the rolloff factor increases the bandwidth.
+%As K is increased, the SRRC pulse spans more symbols in time domain, and ------ in frequency domain. An increase in alpha leads to a wider pulse spectrum.
 \begin{figure}
 \subfloat[Modulated signal] {\includegraphics[width = 0.49\linewidth]{{"tx_Half-Sine_mod"}.png}}
 \subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"tx_Half-Sine_mod_freq"}.png}}
 \caption{Half sine modulated signal(10 bits) and its frequency response}
 \label{fig:tx_hs_random}
 \end{figure}
-
 \begin{figure}
 \subfloat[Modulated signal] {\includegraphics[width = 0.49\linewidth]{{"tx_SRRC_K=4_al=0.50_mod"}.png}}
 \subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"tx_SRRC_K=4_al=0.50_mod_freq"}.png}}
@@ -164,7 +193,7 @@ The MMSE equalizer implementation was similar to the zero forcing equalizer. The
 \label{fig:mmse_eq_noise}
 \end{figure}
 
-The frequency response of the MMSE equalizer is the same as that of the ZF equalizer in absence of noise(see Figures \ref{fig:zf_eq} and \ref{fig:mmse_eq}), but the peak drops down by $15 \unit{dB}$ with a noise variance of $0.01$. This suggests a better performance. In addition, stability is always guaranteed for a non zero noise and a stable channel. Since the poles and zeros of a transfer function occur in conjugate pairs, equation \ref{equation:mmse} leads to the same poles and zeros as the channel.
+The frequency response of the MMSE equalizer is the same as that of the ZF equalizer in absence of noise(see Figures \ref{fig:zf_eq} and \ref{fig:mmse_eq}), but the peak drops down by $15 \unit{dB}$ with a noise variance of $0.01$(Figure \ref{fig:mmse_eq_noise}). This suggests a better performance. In addition, stability is always guaranteed for a non zero noise and a stable channel. Since the poles and zeros of a transfer function occur in conjugate pairs, equation \ref{equation:mmse} leads to the same poles and zeros as the channel.
 \begin{figure}
 \subfloat[Zero Forcing no noise] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_Half-Sine Matched_ch_Test_eq_ZF_ns_0.0000"}.png}}
 \subfloat[MMSE no noise] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_Half-Sine Matched_ch_Test_eq_MMSE_ns_0.0000"}.png}} \\
@@ -187,7 +216,7 @@ As we can see in Figures \ref{fig:eye_eq_hs} and \ref{fig:eye_eq_srrc}, the eye 
 \subsection{Sampling and Detection}
 By definition, the optimal sampling point of a matched filter receiver is at multiples of the pulse duration. This can be seen in the eye openings at time $t=T_p=1 \unit{ s}$ in Figures \ref{fig:eye_eq_hs} and \ref{fig:eye_eq_srrc}.  
 \begin{equation}
-	r[k] = r(k \cdot F_s \cdot T_p \cdot t)
+	r[k] = r(k \cdot T_p \cdot t)
 	\label{equation:sampling}
 \end{equation}
 
@@ -201,11 +230,67 @@ Since the modulation scheme was Binary Antipodal PAM, the detection was done usi
 	\label{equation:detection}
 \end{equation}
 
-{\color{red} TALK ABOUT ERROR PROBABILITY}
-
 \subsection{Image Post-Processor}
+The bit stream received was then converted back into $8 \times 8$ blocks to take the Inverse Discrete Cosine Transform(IDCT). The resulting pixel values were then scaled based on the normalization factors used during pre processing, and reshaped to the original image size. These parameters were assumed to be control signals transmitted along a different channel.
 
 \section{Results}
+Depending on the Noise Power($\sigma^2 = \frac{N_0}{2}$) we had varying success with recovery of the image. As seen in Figures \ref{fig:result_test_zf}, \ref{fig:result_test_mmse}, most reasonable levels of noise allow for reasonable reconstruction. It is also noted that MMSE equalization allows for a better reconstruction at the same noise level. We calculate our SNR as
+\[ SNR = 2 \cdot \frac{E_b}{N_0} = \frac{1}{\sigma^2}\]
+where $E_b = 1$ is the pulse energy and $\sigma^2 = \frac{N_0}{2}$ is the noise power. The threshold for MMSE was 18.24 dB, while the threshold for ZF was 26.02 dB. This makes sense, as the ZF equalizer doesn’t account for the amount of noise present, and as a result has worse performance in the presence of noise. The results in Figure \ref{fig:result_critical_snr} are for a SRRC pulse with $\alpha = 0.5$ and $K = 4$. Two different images were also compared with the same SRRC pulse and a constant SNR of 20 dB in Figure \ref{fig:result_comparison}. The performance is very similar for both images. We clearly see the affects of noise when the ZF equalizer is used at 20 dB SNR. However, that is above the threshold for the MMSE equalizer and we see no quality degradation for the MMSE result.  
+
+The results are very similar with both Half Sine and SRRC pulses. This is because both pulses satisfy the nyquist criteria after matched filtering, and the error probability is a function of signal energy. The nyquist criteria is:
+\[ g(n \cdot T_p) = \begin{cases}
+						1, & n = 0 \\
+						0, & else
+					\end{cases}
+\]
+Before the channel the Half Sine pulse shaping function satisfies the Nyquist criterion for zero ISI. Without a non-ideal channel, or with the use of a equalizer to account for the channel, the half-sine pulse does satisfy the criterion. The SRRC pulse does not satisfy the criterion on transmission, only once we apply the matched filter does the pulse shaping function become satisfactory. Error performance is a function of signal energy and noise power. Because we normalized our signal earlier, and we are controlling for noise, we expect the same error-probability from both pulse-shaping functions. Upon observation, we do see indistinguishable performance. 
+
+Both pulse shapes have similar noise performance at a given energy, but there are benefits to the SRRC pulse. Referring back to the comparison of the pulse-shaping functions in the frequency domain (see Section II B) clearly shows the SRRC approach is much more bandwidth efficient. As we increase K, our pulse response in frequency reduces in width, and lowers the sidelobe height. The downside to this method is the complicated shape of the pulse, as well as the inherent ISI introduced by a pulse that spans longer than our sampling interval. The flexibility of symbol duration and roll-off are also advantages of the SRRC pulse. As a whole SRRC is the more efficient and flexible pulse-shaping function. 
+
+\section{Channel Effect}
+The channels implemented were a model of a real Indoor channel(see response in Figure \ref{fig:ch_indoor}), and a real Outdoor channel(see response in Figure \ref{fig:ch_outdoor}). The indoor channel has a cleaner frequency response and a wider eye than the original test channel(see Figure \ref{fig:eye_ch_indoor_tx_srrc}), whereas the outdoor channel is expected to perform worse based on the closed eye in Figure \ref{fig:eye_ch_outdoor_tx_srrc}. Since the performance of both pulse shapes were similar in earlier simulations, the channel was investigated using an SRRC pulse with $K=4$ and $\alpha=0.5$. The comparison was done using both ZF and MMSE equalizers.
+\begin{figure}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"ch_Indoor_impulse"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"ch_Indoor_freq"}.png}}
+\caption{Response of Indoor channel}
+\label{fig:ch_indoor}
+\end{figure}
+\begin{figure}
+\subfloat[Impulse response] {\includegraphics[width = 0.49\linewidth]{{"ch_Outdoor_impulse"}.png}}
+\subfloat[Frequency response] {\includegraphics[width = 0.49\linewidth]{{"ch_Outdoor_freq"}.png}}
+\caption{Response of Outdoor channel}
+\label{fig:ch_outdoor}
+\end{figure}
+\begin{figure}
+\subfloat[Zero Forcing $\sigma^2= 0.01$] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Indoor_eq_ZF_ns_0.0100"}.png}}
+\subfloat[MMSE $\sigma^2= 0.01$] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Indoor_eq_MMSE_ns_0.0100"}.png}} \\
+\caption{Eye diagram of equalizers on Indoor channel using SRRC Transmitter}
+\label{fig:eye_ch_indoor_tx_srrc}
+\end{figure}
+\begin{figure}
+\subfloat[Zero Forcing $\sigma^2= 0.01$] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Outdoor_eq_ZF_ns_0.0010"}.png}}
+\subfloat[MMSE $\sigma^2= 0.01$] {\includegraphics[width = 0.49\linewidth]{{"eye_rx_SRRC_K=4_al=0.50 Matched_ch_Outdoor_eq_MMSE_ns_0.0010"}.png}} \\
+\caption{Eye diagram of equalizers on Outdoor channel using SRRC Transmitter}
+\label{fig:eye_ch_outdoor_tx_srrc}
+\end{figure}
+
+We see in Figure \ref{fig:result_ch_indoor_outdoor_20dB} that the indoor channel actually improves the performance of the system, whereas the outdoor channel wrecks havoc on both the ZF and MMSE equalizers. The power gain of the channels are:  
+\begin{table}[H]
+	\centering
+	\begin{tabular} {c c}
+	\hline 
+		Channel & Power Gain ($\frac{W}{W}$) \\ \hline
+%	\hline 
+		Original & 1.89 \\ 
+		Indoor  & 1.23  \\
+		Outdoor & 1.75 \\ \hline
+%	\hline
+	\end{tabular}
+\end{table}
+It makes sense that the ZF equalizer does better with the lowest power, as that channel has no deep fades. The ZF equalizer may also benefit from the lower noise on the indoor channel (even though the noise and signal are lower, the absolute noise also decreases compared to the original channel.)  We also tried the outdoor channel with more points, hoping it would improve the results. As seen in Figure \ref{fig:result_ch_indoor_outdoor_20dB}, the ZF equalizer did slightly better, eliminating the wrapping effect we saw, but the MMSE equalizer is still terrible.  
+{\color{red} WHY DOES THE OUTDOOR CHANNEL FUCK EVERYTHING UP?}
+% RESULTS
 \begin{figure*}
 \subfloat[Transmitted] {\includegraphics[width = 0.24\linewidth]{{"cat"}.jpeg}} \hfill
 \subfloat[ZF equalizer, $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
@@ -219,7 +304,6 @@ Since the modulation scheme was Binary Antipodal PAM, the detection was done usi
 \caption{Results of Binary PAM using Half Sine pulse on test channel}
 \label{fig:result_test_zf}
 \end{figure*}
-
 \begin{figure*}
 \subfloat[Transmitted] {\includegraphics[width = 0.24\linewidth]{{"cat"}.jpeg}} \hfill
 \subfloat[ZF equalizer, $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_K=4_al=0.50_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
@@ -233,36 +317,28 @@ Since the modulation scheme was Binary Antipodal PAM, the detection was done usi
 \caption{Results of Binary PAM using SRRC pulse on test channel}
 \label{fig:result_test_mmse}
 \end{figure*}
-
-\section{Channel Effect}
-Since the noise performance was best with -- pulse and MMSE equalizer, the channel effect was investigated using that particular combination of pulse shape and equalizer.
-
-\subsection{Indoor Channel}
-\iffalse
 \begin{figure*}
-\subfloat[Transmitted] {\includegraphics[width = 0.24\linewidth]{{"cat"}.jpeg}} \hfill
-\subfloat[RX SRRC $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
-\subfloat[RX SRRC $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0010"}.png}} \hfill
-\subfloat[RX SRRC $\sigma^2 = 0.1$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.1000"}.png}} 
-\caption{Results of Binary PAM using MMSE equalizer on indoor channel}
-\label{fig:result_indoor_mmse}
+\subfloat[Transmitted] {\includegraphics[width = 0.29\linewidth]{{"Falcon/FALCON_original"}.png}}  \hfill
+\subfloat[ZF equalizer critical SNR] {\includegraphics[width = 0.63\linewidth]{{"Falcon/compare_0025_05_threshold_ZF"}.png}} \\
+\subfloat[Transmitted] {\includegraphics[width = 0.29\linewidth]{{"Falcon/FALCON_original"}.png}}  \hfill
+\subfloat[MMSE equalizer critical SNR] {\includegraphics[width = 0.63\linewidth]{{"Falcon/compare_015_1225_threshold_MMSE"}.png}}
+\caption{Results of Binary PAM on test channel at critical SNR values} 
+\label{fig:result_critical_snr}
 \end{figure*}
-\fi
-
-
-\subsection{Outdoor Channel}
-\iffalse
 \begin{figure*}
-\subfloat[Transmitted] {\includegraphics[width = 0.24\linewidth]{{"cat"}.jpeg}} \hfill
-\subfloat[RX HalfSine $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
-\subfloat[RX HalfSine $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0010"}.png}} \hfill
-\subfloat[RX HalfSine $\sigma^2 = 0.01$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_Half-Sine_ch_Test_eq_ZF_ns_0.0100"}.png}} 
-\\
-\subfloat[RX SRRC $\sigma^2 = 0$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0000"}.png}} \hfill
-\subfloat[RX SRRC $\sigma^2 = 0.001$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0010"}.png}} \hfill
-\subfloat[RX SRRC $\sigma^2 = 0.01$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.0100"}.png}} \hfill
-\subfloat[RX SRRC $\sigma^2 = 0.1$] {\includegraphics[width = 0.24\linewidth]{{"cat_tx_SRRC_ch_Test_eq_ZF_ns_0.1000"}.png}} 
-\caption{Results of Binary PAM using MMSE equalizer on outdoor channel}
-\label{fig:result_outdoor_mmse}
+\centering
+\subfloat[Half Sine Pulse, Kong] {\includegraphics[width = 0.8\linewidth]{{"Kong/KONG_HALFSIN_SNR_20dB"}.png}} \\
+\subfloat[Half Sine Pulse, Falcon] {\includegraphics[width = 0.8\linewidth]{{"Falcon/FALCON_HALFSIN_SNR_20dB"}.png}}  \\
+\subfloat[SRRC Pulse, Kong] {\includegraphics[width = 0.8\linewidth]{{"Kong/KONG_SRRC_K4_SNR_20dB"}.png}} \\
+\subfloat[SRRC Pulse, Falcon] {\includegraphics[width = 0.8\linewidth]{{"Falcon/FALCON_SRRC_K4_SNR_20dB"}.png}}  
+\caption{Comparison of two different images with 20 dB SNR} 
+\label{fig:result_comparison}
 \end{figure*}
-\fi
+\begin{figure*}
+\centering
+\subfloat[Indoor Channel] {\includegraphics[width = 0.88\linewidth]{{"Falcon/FALCON_indoor"}.png}} \\
+\subfloat[Outdoor Channel] {\includegraphics[width = 0.88\linewidth]{{"Falcon/FALCON_outdoor"}.png}} \\
+\subfloat[Outdoor Channel with more points] {\includegraphics[width = 0.88\linewidth]{{"Falcon/FALCON_outdoor_MORE_POINTS"}.png}}  
+\caption{Results on Indoor and Outdoor Channel using same Falcon picture with same SNR of 20dB} 
+\label{fig:result_ch_indoor_outdoor_20dB}
+\end{figure*}
