@@ -86,8 +86,8 @@ if __name__ == "__main__":
 
 	transmitters = [hs_tx, srrc_txs[-1], srrc_txs[0]]
 
-	for transmitter in transmitters:
-		test_modulation(transmitter, random_bits, Fs, SAVED = True)
+#	for transmitter in transmitters:
+#		test_modulation(transmitter, random_bits, Fs, SAVED = True)
 		#test_eye_diagram(transmitter, SAVED = False)	
 	
 

@@ -14,13 +14,13 @@ def bode_plot(t, x_t, xlim=None, label = None, titleText = 'Frequency response')
 	f = Fs/N * np.arange(np.floor(-(N - 1)/2) , np.floor((N - 1)/2) + 1)
 	
 	plt.subplot(2, 1, 1)
-	plt.plot(f, 20 * np.log10(np.abs(X_f)), label = label)
+	plt.plot(f, 20 * np.log10(np.abs(X_f)), label = label, linewidth=0.5)
 	plt.title(titleText)
 	plt.ylabel('|H(f)|, dB')
 	if xlim is not None:
 		plt.xlim(xlim)
 	plt.subplot(2, 1, 2)
-	plt.plot(f, np.unwrap(np.angle(X_f)) / np.pi)
+	plt.plot(f, np.unwrap(np.angle(X_f)) / np.pi, linewidth=0.5)
 	plt.xlabel('f, Hz')
 	plt.ylabel('< H(f), x pi rad/s')
 	if xlim is not None:

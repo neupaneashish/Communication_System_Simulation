@@ -63,6 +63,11 @@ def test_equalization_no_noise(equalizer, channel, transmitter, receiver, bits, 
 def test_eye_diagram(equalizer, channel, transmitter, receiver, noise_var = 0.01, SAVED = False):
 	plt.figure()
 	equalizer.plot_eye_diagram(transmitter, channel, receiver, noise_var = noise_var)
+	if SAVED:
+		myplt.save_current('eye_rx_%s_ch_%s_eq_%s_ns_%.4f.png' % 
+							(receiver.name, channel.name, equalizer.name, noise_var),
+							'PLOT')
+
 
 def test_sampling(equalizer, channel, transmitter, receiver, bits, titleText = None, SAVED = False):
 	t_mod, mod_signal = transmitter.transmit_bits(bits)
@@ -88,15 +93,15 @@ if __name__ == '__main__':
 	Fs = 32		# samples/sec in pulse representation
 	alpha = 0.5
 	K = 4
-	noise_var = 0
+	noise_var = 0.001
 
 	random_bits = np.random.randint(2, size = 10)	# to test transmission
 	# channel impulse responses - modeled as an LTI system with finite impulse response 
-	h_test = np.array([1, 1/2, 3/4, -2/7])
-	ch_test = chnl.Channel(h_test, np.ones(1), Fs, T_pulse, 'Test')
+	#h_test = np.array([1, 1/2, 3/4, -2/7])
+	#ch_test = chnl.Channel(h_test, np.ones(1), Fs, T_pulse, 'Test')
 
 	#ch_test = chnl.IndoorChannel(Fs, T_pulse)
-	#ch_test = chnl.OutdoorChannel(Fs, T_pulse)
+	ch_test = chnl.OutdoorChannel(Fs, T_pulse)
 
 	eq_zf = eqz.ZFEqualizer(ch_test, Fs, T_pulse)
 	eq_mmse = eqz.MMSEEqualizer(ch_test, Fs, T_pulse, noise_var = noise_var)
@@ -104,17 +109,17 @@ if __name__ == '__main__':
 
 	# transmitter and receiver - 
 	#tx_test = tx.HalfSineTransmitter(T_pulse, Fs)
-	#tx_test = tx.SRRCTransmitter(alpha, T_pulse, Fs, K)
-	#rx_test = rx.MatchedReceiver(tx_test)
+	tx_test = tx.SRRCTransmitter(alpha, T_pulse, Fs, K)
+	rx_test = rx.MatchedReceiver(tx_test)
 
 	for equalizer in equalizers:
 		print('Working on- Equalizer: ', equalizer.name, 
 				', Channel: ', ch_test.name, ' ...')
 		
-		test_equalizer_response(equalizer, noise = noise_var, SAVED = True)
+		#test_equalizer_response(equalizer, noise = noise_var, SAVED = True)
 		#test_equalization_only_channel(equalizer, ch_test, , random_bits, Fs)
 		#test_equalization_no_noise(equalizer, ch_test, tx_test, rx_test, random_bits)
-		#test_eye_diagram(equalizer, ch_test, tx_test, rx_test, noise_var = noise_var)
+		test_eye_diagram(equalizer, ch_test, tx_test, rx_test, noise_var = noise_var, SAVED=True)
 		#test_sampling(equalizer, ch_test, tx_test, rx_test, random_bits)
 
 	plt.show()

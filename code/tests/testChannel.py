@@ -42,7 +42,7 @@ def test_eye_diagram(channel, transmitter, SAVED = False):
 	channel.plot_eye_diagram(transmitter)
 	
 	if SAVED:
-		filename = 'eye_%s_%s.png' % (channel.name, transmitter.name)
+		filename = 'eye_tx_%s_ch_%s.png' % (transmitter.name, channel.name)
 		myplt.save_current(filename, 'PLOT')
 
 def test_noise_eye(channel, transmitter, mean = 0, var = 1, SAVED = False):
@@ -50,7 +50,7 @@ def test_noise_eye(channel, transmitter, mean = 0, var = 1, SAVED = False):
 	channel.plot_eye_diagram_after_noise(transmitter, mean = mean, var = var)
 
 	if SAVED:
-		filename = 'eye_%s_%s_noise%.4f.png' % (channel.name, transmitter.name, var)
+		filename = 'eye_tx_%s_ch_%s_ns_%.4f.png' % (transmitter.name, channel.name, var)
 		myplt.save_current(filename)
 
 if __name__ == "__main__":
@@ -70,23 +70,23 @@ if __name__ == "__main__":
 	h_test = np.array([1, 1/2, 3/4, -2/7])
 	
 
-	ch_test = chnl.Channel(h_test, np.ones(1), Fs, T_pulse, 'Test')
-	#ch_indoor = chnl.IndoorChannel(Fs, T_pulse)
-	#ch_outdoor = chnl.OutdoorChannel(Fs, T_pulse)
-	#channels = [ch_test, ch_indoor, ch_outdoor]
-	channels = [ch_test]
+	#ch_test = chnl.Channel(h_test, np.ones(1), Fs, T_pulse, 'Test')
+	ch_indoor = chnl.IndoorChannel(Fs, T_pulse)
+	ch_outdoor = chnl.OutdoorChannel(Fs, T_pulse)
+	channels = [ch_indoor, ch_outdoor]
+	#channels = [ch_test]
 
 	random_bits = np.random.randint(2, size = 10)	# to test transmission
 			
 	for channel in channels:
-		test_channel_response(channel, SAVED = True)
+		#test_channel_response(channel, SAVED = True)
 
 		for transmitter in transmitters:
 			#test_transmission(channel, transmitter, random_bits)
 
-			#test_eye_diagram(channel, transmitter, SAVED = False)
+			test_eye_diagram(channel, transmitter, SAVED = False)
 			for noise_var in noise_vars:
 				pass
-			#	test_noise_eye(channel, transmitter, mean = noise_mean, var = noise_var, SAVED = False)
+				test_noise_eye(channel, transmitter, mean = noise_mean, var = noise_var, SAVED = False)
 
 	plt.show()

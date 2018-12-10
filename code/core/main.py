@@ -14,13 +14,14 @@ IMG_OUT_PATH = os.path.join(os.getcwd(), '../../images_out')
 
 
 # works on only n files - set to None to do all
-N_FILES = 2
+N_FILES = 1
 SAVE_OUTPUT = True
 ext = ('.jpg', '.jpeg', '.png',)
 image_files = [fname for fname in os.listdir(IMG_IN_PATH) if fname.lower().endswith(ext)]
 image_files = image_files[:N_FILES] if N_FILES is not None else image_files
 image_files = [os.path.join(IMG_IN_PATH, file) for file in image_files]
 
+image_files = [os.path.join(IMG_IN_PATH, 'cameraman_gray.png')]
 
 def main():
     block_size = 8
@@ -29,7 +30,7 @@ def main():
     Fs = 32     # samples/sec in pulse representation
     alpha = 0.5
     K = 4
-    noises = [0, 0.0001, 0.001, 0.01, 0.1]
+    noises = [0.002, 0.003, 0.015, 0.02]
     #transmit_camera_with_eye_plots_zf(block_size, num_quant_bits, T_pulse, Fs, K, alpha)
     #transmit_camera_with_eye_plots_mmse(block_size, num_quant_bits, T_pulse, Fs, K, alpha)
     #comms_sys = initialize_hs_zf_testch(block_size, qbits, T_pulse, Fs)

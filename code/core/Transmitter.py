@@ -83,7 +83,7 @@ class Transmitter():
 		print('\tPlotting frequency response ...')
 		if titleText is None:
 			titleText = 'Frequency Response ' + self.__type + ' pulse shaping filter'
-		myplt.bode_plot(self.__t, self.__pulse_t, titleText = titleText)
+		myplt.bode_plot(self.__t, self.__pulse_t, xlim = (-5, 5), titleText = titleText)
 
 	def plot_eye_diagram(self, num_symbols = 1000):
 		random_symbols = np.random.randint(self.__M, size = num_symbols)
